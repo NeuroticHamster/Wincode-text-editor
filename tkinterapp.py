@@ -6,14 +6,17 @@ import tkinter.font as tkfont
 from tkinter import StringVar
 from tkinter.ttk import Style
 from tkinter import Toplevel
+
 #-------------------------------tkinter---------------
 from tkinter.scrolledtext import ScrolledText
 import time
 import os
 import sqlite3
 from threading import Thread
-
+class checkitfucker:
+	pass
 from collections import Counter
+from queue import Queue
 #-------------------------------python standard---------------
 import keyboard
 from PIL import ImageTk, Image
@@ -49,6 +52,11 @@ Base.metadata.bind = engine
 dbsession = sessionmaker(bind=engine)
 		
 session = dbsession()'''
+
+
+
+
+#-----------------------Load out/info page-------------------------
 class recent(Base):
 	__tablename__ = 'recentfiles'
 	id = Column(Integer, primary_key=True)
@@ -64,12 +72,6 @@ class main(tkinter.Tk):
 		main.LandingPage(self, frame)
 		s = Style()
 		s.theme_use('xpnative')
-		butfuncs = lambda: editControls.startsthreads()
-		butfuncs()
-		
-		
-	   
-		
 		
 
 		
@@ -98,7 +100,7 @@ class main(tkinter.Tk):
 		#main.waiting(self, frame)
 		s = Style()
 		s.theme_use('clam')
-
+		#--------------------------database------------------------------
 class controlers:
 	def __init__():
 		print('did the controlers init actually run?')
@@ -159,7 +161,7 @@ class controlers:
 			return sortedout
 		
 		
-		
+	#--------------------open and highlight text editor/load attached notes------------------
 	def openfiles(box, directory, notes=None, title=None):
 		check = 'block'
 
@@ -240,8 +242,8 @@ class controlers:
 						
 						notes.insert('end', item)
 			
-			
 			#controlers.shiftpage(navigation.secondpage(directory=directory))
+	#----------------------------------run command-------------------
 	def runfile(self, output):
 		directory = controlers.sessionmanager(currentdir='Query', query=True)
 		
@@ -253,7 +255,7 @@ class controlers:
 			sts = os.system('python' + str(new))
 		#exec(open(str(navigation.directory)).read())
 		#savefile(directory, output)
-
+	#---------------------------quick save/ save commands------------------
 	def savefile(self, output, directory):
 		print('check' + str(directory))
 		#newdir = controlers.sessionmanager(currentdir='query', query=True)
@@ -281,7 +283,7 @@ class controlers:
 		function(directory)
 		controlers.goaway(self)
 		
-	
+	#-----------------------------------hardly used screen controler/ shiftpage and goaway--------------
 	def shiftpage(self, frame, function):
 		#frame = tkinter.Frame(self)
 		
@@ -290,12 +292,14 @@ class controlers:
 		function()
 		controlers.goaway(self)
 			
-	def waiting(self, frame):
+	'''def waiting(self, frame):
 		 h = lambda: main.shiftpage(self, frame)
-		 self.after(3000, lambda: h())
+		 self.after(3000, lambda: h())'''
 
 	def goaway(self):
 		self.withdraw()
+
+	#--------------------------search function functions-----------------
 	def searched(widget=None, editor=None, butts=None, linelabel=None):
 	 
 		results = widget.get()
@@ -363,7 +367,7 @@ class navigation(tkinter.Tk):
 	
 
 		
-
+	#------------------------main editor window widget----------------------
 	def secondpage(self, directory=None):
 		controlers.sessionmanager(currentdir='none')
 		print(directory)
@@ -436,18 +440,47 @@ class navigation(tkinter.Tk):
 		#listmenu.add_command(label='Recent Files')
 		editmenu.add_cascade(label='Recent Files', menu=listmenu)
 		newfiles = []
+		#editControls.startsthreads(editor)
+		
+		newbutt = tkinter.Button(frames, text='text', command=lambda:editControls.startsthreads(editor))
+		newbutt.grid()
+		#self.bind('<Return>', lambda event, widget=editor: editControls.startsthreads(event, widget))
 		for item in recentfiles:
 			navigation.functionscall(listmenu=listmenu, box=editor, directory=item[0], notes = notes, title=filetitles)
 		
 		s = Style()
 		s.theme_use('clam')
+		self.after(7000, lambda: navigation.testfunc(self, editor))
 		
-		#-------------------------------function calls---------------
-
+	#-------------------------call backs/event monitoring---------------
+	def testfunc(self, editor):
+		print('fucking bitch')
+		classIds = []
+		self.after(10000, lambda: navigation.waiting(self, editor))
+				
+		current_input = [editor.get('1.0', 'end').split('\n')]
+		for item in current_input:
+			for count, items in enumerate(item):
+				if 'class' in str(items):
+					print(items)
+					print(count)
+					classIds.append(count)
+		for item in classIds:
+			editor.tag_add('alter_class', float(item + 1), float(item + 2))
+			editor.tag_configure('alter_class', foreground='purple')
+	def waiting(self, editor):
+		print('waiting')
+		self.after(5000, lambda: navigation.testfunc(self, editor))
 		
+			
+		
+		
+	#-------------------------------side bar/peripherals---------------
 	def functionscall(listmenu=None, box=None, notes=None, directory=None, title=None):
+		#temporary function to get lambda to work in for loop
 		h = lambda:controlers.openfiles(box=box, notes=notes, directory=directory, title=title)
 		listmenu.add_command(label=directory, command=h)
+	#-----------------------------builds listbox on the sidebar-------------
 	def netwidgets(self, frames):
 		lists = tkinter.Listbox(frames)
 		
@@ -461,7 +494,7 @@ class navigation(tkinter.Tk):
 		url.grid(row=5, column=4, pady=5)
 
 		#url.pack(side='right')
-				#-------------------------------notes---------------
+	#-------------------------------notes---------------
 
 	def noteinterface(self, frames, editor):
 		notes = tkinter.Text(frames, width=15)
@@ -514,11 +547,14 @@ class navigation(tkinter.Tk):
 		butts = tkinter.Button(framess, foreground='blue', text='search', width=40, command=tempfunc)
 
 		butts.grid()
+		
+		
 		removeit = lambda: editor.tag_remove('highlight', '1.0', 'end')
 		clearbutts = tkinter.Button(framess, width=40, foreground='blue', text='clear', command=removeit)
 		clearbutts.grid()
 		
-
+		#------------------search function indexs return items-----------
+		#referenced above
 	def newfuncs(notes=None, box=None, title=None, directory=None):
 		return controlers.openfiles(box=box, notes=notes, title=title, directory=directory)
 		
@@ -527,11 +563,13 @@ class navigation(tkinter.Tk):
 		Cvalue.delete(0, 'end')
 		Cvalue.insert('end', str(newval + 1))
 		#print(newval)
+
 	def tagremover():
 		
 		controlers.textfocus(remove=True)
-
+		#-------------------------cut/copy/paste---------------------
 class editControls(object):
+	editor = 0
 	def __init__(self, event, cords, editor):
 		frame = Toplevel()
 		xcord = cords.winfo_pointerx()
@@ -577,67 +615,396 @@ class editControls(object):
 		print(frame.clipboard_get())
 
 
-	def startsthreads():
-		
-		
-		#directory = controlers.sessionmanager(currentdir='Query', query=True)
-		#editControls.shortcuts()
-		#pool = ThreadPool(processes=1)
-		#for item in range(0):
-			#async_result = pool.apply_async(editControls.countsup) 
-		
-		#return_val = async_result.get()
-		#print(return_val) 
-		#pool.close()
-		#pool.join()
-		#self.after(30000, print('checking after functions'))
-		#editControls.startsthreads(self)
-		threadcheck = Thread(target=editControls.shortcuts)
-		#threadcheck.deamon = True
-		threadcheck.start()
-
-	def class_shortcut(value):
-		print(value)
+	'''def startsthreads(editor):
+		q = Queue(maxsize=0)
+		r = Queue(maxsize=0)
+		for item in range(10):
+			r.put(editor)
+		#q.put(editor)
+		fake = 0
+		proc = []
+		#shitfuck = editControls.prints_numbers(editor)
+		for item in range(10):
+			q.put(editor)
+			
 	
-	
-	
-	def shortcuts():
-		#self= Toplevel()
-		print('checking')
+		refresh = Thread(target=editControls.shortcuts, args=(editControls.prints_numbers, q))
 		
-		directory = controlers.sessionmanager(currentdir='Query', query=True)
-		
-		with open(str(directory), 'r') as file:
-				for count, item in enumerate(file):
-					if 'class' in str(item):
-						print(item)
-						
-		
-		
-		
-		time.sleep(10)
-		return editControls.startsthreads()
-		
-	
-		
-		
-		
-		
+		refresh.start()
 		
 			
+
+	def class_shortcut(value, editor):
+		for item in value:
+			item.join()
+		
+	
+	def shortcuts(shitfuck, value):
+		#self= Toplevel()
+		for x in range(10):
+			print('checking')
+		
+					
+		
+			time.sleep(10)
+			shitfuck(q)
 		
 		
-  
+	
+		
+		
+	def prints_numbers(editor):
+		print('god damnit mother fucker')
+		print(editor.get('1.0', 'end'))
+		#editControls.startsthreads(editor)
+		
+	def basic_queues(editor):
+		pass
 		
 
+	def do_stuff(q):
+		while True:
+			print(q.get())
+			q.task_done()'''
+
 		
-		
-		
+
+
 
 main2 = main()
 #classtwo = editControls
 #classtwo()
 main2.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
