@@ -13,8 +13,7 @@ import time
 import os
 import sqlite3
 from threading import Thread
-class checkitfucker:
-	pass
+
 from collections import Counter
 from queue import Queue
 #-------------------------------python standard---------------
@@ -419,6 +418,7 @@ class navigation(tkinter.Tk):
 		#h = lambda: filedialog.askopenfilname(initialdir = "/",title = "Select file",filetypes = (("jpeg files","*.jpg"),("all files","*.*")))
 		allfiles = lambda: controlers.savefile(self=self, directory=filedialog.asksaveasfilename(initialdir = './', title ='title', defaultextension='.py', filetypes = (('py files', '*.py'), ('text', '*.txt'))), output=str(editor.get("1.0",'end')))
 		navigation.netwidgets(self, frames)
+		listbox = navigation.netwidgets(self, frames)
 		saves = lambda: controlers.savefile(directory=str(allfiles), output=editor.get("1.0", 'end'))
 		#-------------------------------menu---------------
 		menubar = tkinter.Menu(self)
@@ -450,27 +450,60 @@ class navigation(tkinter.Tk):
 		
 		s = Style()
 		s.theme_use('clam')
-		self.after(7000, lambda: navigation.testfunc(self, editor))
+		self.after(7000, lambda: navigation.testfunc(self, editor, listbox))
 		
 	#-------------------------call backs/event monitoring---------------
-	def testfunc(self, editor):
-		print('fucking bitch')
+
+	def testfunc(self, editor, listbox):
+		# class callback
+		print('did callback fire')
 		classIds = []
-		self.after(10000, lambda: navigation.waiting(self, editor))
+		methodIds = []
+		allIds = []
+		
+		self.after(10000, lambda: navigation.waiting(self, editor, listbox))
 				
 		current_input = [editor.get('1.0', 'end').split('\n')]
 		for item in current_input:
 			for count, items in enumerate(item):
-				if 'class' in str(items):
+				if 'cla' + 's' * 2 + ' ' in str(items) and ':' in str(items):
 					print(items)
 					print(count)
+					allIds.append(count)
 					classIds.append(count)
+					if str(items) not in listbox.get(0, 'end'):
+						listbox.insert('end', str(items))
+				if '	def ' in str(items) and ':' in str(items):
+					print(items)
+					print(count)
+					allIds.append(count)
+					methodIds.append(count)
+					if str(items) not in listbox.get(0, 'end'):
+						listbox.insert('end', str(items))
+		
+					
 		for item in classIds:
 			editor.tag_add('alter_class', float(item + 1), float(item + 2))
 			editor.tag_configure('alter_class', foreground='purple')
-	def waiting(self, editor):
+			
+		for item in methodIds:
+			editor.tag_add('alter_method', float(item + 1), float(item + 2))
+			editor.tag_configure('alter_method', foreground='blue')
+
+		for count, item in enumerate(listbox.get(0, 'end')):
+			#print(str(x) + 'integer')
+			
+			if 'class ' in str(item):
+				listbox.itemconfig(count, {'foreground': 'red'})
+			else:
+				listbox.itemconfig(count, {'foreground': 'blue'})
+			
+		listbox.bind("<<ListboxSelect>>", lambda event=None, lists=listbox: navigation.lbox_output(event, lists, allIds, editor))
+		
+		
+	def waiting(self, editor, listbox):
 		print('waiting')
-		self.after(5000, lambda: navigation.testfunc(self, editor))
+		self.after(5000, lambda: navigation.testfunc(self, editor, listbox))
 		
 			
 		
@@ -491,9 +524,21 @@ class navigation(tkinter.Tk):
 		label = tkinter.Label(frames, text='add a url')
 		label.grid(row=4, column=4)
 		url = tkinter.Entry(frames)
-		url.grid(row=5, column=4, pady=5)
+		url.grid(row=2, column=4, pady=5)
+		scroll = tkinter.Scrollbar(frames, command=lists.yview, orient='vertical')
+		scroll.grid(row=3, column=6, sticky='ns')
+		#lists.config(wrap='none')
+		lists['yscrollcommand'] = scroll.set
 
 		#url.pack(side='right')
+		return lists
+	def lbox_output(event, listbox, allIds=None, editor=None):
+		print(listbox.get('active'))
+		integer = (listbox.curselection())
+		for item in integer:
+			editor.see(str(float(allIds[item])))
+		
+		
 	#-------------------------------notes---------------
 
 	def noteinterface(self, frames, editor):
@@ -667,7 +712,7 @@ class editControls(object):
 			print(q.get())
 			q.task_done()'''
 
-		
+
 
 
 
@@ -675,6 +720,62 @@ main2 = main()
 #classtwo = editControls
 #classtwo()
 main2.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
